@@ -24,10 +24,13 @@ public class FlexiblePageControl: UIView {
         }
     }
 
-    public var currentPage: Int = 0 {
-        didSet {
-            scrollView.layer.removeAllAnimations()
-            setCurrentPage(currentPage: currentPage, animated: true)
+    /// The property value is an integer specifying the current page shown minus one; thus a value of zero (the default) indicates the first page. Values outside the possible range are pinned to either 0 or numberOfPages minus 1.
+    public var currentPage: Int {
+        get {
+            return _currentPage
+        }
+        set {
+            setCurrentPage(newValue, animated: false)
         }
     }
 
@@ -117,8 +120,7 @@ public class FlexiblePageControl: UIView {
     public func setProgress(contentOffsetX: CGFloat, pageWidth: CGFloat) {
 
         let currentPage = Int(round(contentOffsetX/pageWidth))
-        if currentPage == self.currentPage { return }
-        self.currentPage = currentPage
+        setCurrentPage(currentPage, animated: true)
     }
 
     public func updateViewSize() {
@@ -139,6 +141,8 @@ public class FlexiblePageControl: UIView {
     
     private var items:[ItemView] = [ItemView]()
 
+    private var _currentPage = 0
+
     private func setup() {
 
         backgroundColor = UIColor.clear
@@ -148,6 +152,8 @@ public class FlexiblePageControl: UIView {
         scrollView.showsHorizontalScrollIndicator = false
 
         addSubview(scrollView)
+
+        update()
     }
 
     private func update() {
@@ -180,11 +186,19 @@ public class FlexiblePageControl: UIView {
             scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         }
 
-        setCurrentPage(currentPage: currentPage, animated: false)
+        updateControl(currentPage: currentPage, animated: false)
     }
 
-    private func setCurrentPage(currentPage: Int, animated: Bool) {
+    func setCurrentPage(_ currentPage: Int, animated: Bool) {
+        let pinnedValue = max(min(currentPage, numberOfPages - 1), 0)
 
+        if pinnedValue != _currentPage {
+            _currentPage = pinnedValue
+            updateControl(currentPage: pinnedValue, animated: animated)
+        }
+    }
+
+    private func updateControl(currentPage: Int, animated: Bool) {
         updateDotColor(currentPage: currentPage)
         
         if canScroll {
