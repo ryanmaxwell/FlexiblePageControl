@@ -158,6 +158,8 @@ public class FlexiblePageControl: UIView {
 
     private func update() {
 
+        self.items.forEach { $0.removeFromSuperview() }
+
         var items:[ItemView] = []
         for index in -2..<(displayCount+2) {
             let item = ItemView(itemSize: itemSize, dotSize: dotSize, index: index)
@@ -166,14 +168,8 @@ public class FlexiblePageControl: UIView {
         self.items = items
 
         scrollView.contentSize = CGSize(width: itemSize * CGFloat(numberOfPages), height: itemSize)
-
-        let views = scrollView.subviews
-        for view in views {
-            view.removeFromSuperview()
-        }
-        for i in 0..<items.count {
-            scrollView.addSubview(items[i])
-        }
+        
+        items.forEach { scrollView.addSubview($0) }
 
         let size = CGSize(width: itemSize * CGFloat(displayCount), height: itemSize)
         let frame = CGRect(origin: .zero, size: size)
@@ -208,10 +204,10 @@ public class FlexiblePageControl: UIView {
     }
     
     private func updateDotColor(currentPage: Int) {
-     
-        for index in 0..<(displayCount + 4) {
-            let pageIndex = items[index].index
-            items[index].dotColor = (pageIndex == currentPage) ? currentPageIndicatorTintColor : pageIndicatorTintColor
+
+        items.forEach { item in
+            let pageIndex = item.index
+            item.dotColor = (pageIndex == currentPage) ? currentPageIndicatorTintColor : pageIndicatorTintColor
         }
     }
     
@@ -294,9 +290,7 @@ public class FlexiblePageControl: UIView {
 
         let duration = animated ? animateDuration : 0
 
-        for index in 0..<(displayCount + 4) {
-
-            let item = items[index]
+        items.forEach { item in
 
             item.animateDuration = duration
 
