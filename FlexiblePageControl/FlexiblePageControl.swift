@@ -189,8 +189,21 @@ public class FlexiblePageControl: UIView {
         let pinnedValue = max(min(currentPage, numberOfPages - 1), 0)
 
         if pinnedValue != _currentPage {
-            _currentPage = pinnedValue
-            updateControl(currentPage: pinnedValue, animated: animated)
+
+            // note - this is a bit lame but we're advancing the indexes one by one so that we get the state correct when we end up at the final page.
+            // otherwise the reuse logic messes us up and the control is broken visually until you interact with it forward and back a page.
+            if pinnedValue > _currentPage {
+
+                while _currentPage < pinnedValue {
+                    _currentPage += 1
+                    updateControl(currentPage: _currentPage, animated: animated)
+                }
+            } else {
+                while _currentPage > pinnedValue {
+                    _currentPage -= 1
+                    updateControl(currentPage: _currentPage, animated: animated)
+                }
+            }
         }
     }
 
